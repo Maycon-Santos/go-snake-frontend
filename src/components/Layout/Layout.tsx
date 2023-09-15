@@ -9,11 +9,11 @@ const eightBitWonder = localFont({
 });
 
 interface LayoutProps extends PropsWithChildren<React.HTMLProps<HTMLElement>> {
-  containerWidth?: "small" | "medium" | "large" | "fluid";
+  containerWidth?: "small" | "medium" | "large" | "full";
 }
 
 export const Layout: React.FC<LayoutProps> = (props) => {
-  const { className, containerWidth = "fluid", children, ...rest } = props;
+  const { className, containerWidth = "full", children, ...rest } = props;
 
   return (
     <>

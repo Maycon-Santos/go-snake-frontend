@@ -9,7 +9,7 @@ import Logo from "@/components/Logo";
 export default function Home() {
   return (
     <Layout containerWidth="small" className="flex h-screen">
-      <div className="w-full m-auto overflow-hidden py-8">
+      <div className="w-full m-auto py-8">
         <Logo />
         <Form className="mt-10 md:mt-16">
           <span className="text-sm mb-3 block">Sign in</span>
@@ -18,7 +18,7 @@ export default function Home() {
             <Input type="password" placeholder="Password" required />
             <div className="grid grid-cols-3 gap-3">
               <div className="flex items-center col-span-2">
-                <Link href={""} className="text-sm">
+                <Link href="/recover-password" className="text-sm">
                   Recover password
                 </Link>
               </div>
