@@ -35,7 +35,8 @@
   --spacing-12: 70px;
   --spacing-13: 82px;
 
-  --primary-color: #ffba00;
+  --primary-color: #354fd5;
+  --error-color: #c55959;
   --secondary-color: #9c26df;
   --tertiary-color: #2e2d36;
 }
@@ -70,5 +71,9 @@ a {
 
 body {
   color: var(--foreground-color);
+  background-color: var(--background-color);
+}
+
+.bg-color {
   background-color: var(--background-color);
 }

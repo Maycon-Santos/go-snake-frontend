@@ -30,7 +30,11 @@ export default function Home() {
           <div className="mt-8 md:mt-12">
             <Separator className="mb-6">Or</Separator>
             <div className="flex justify-center">
-              <Button Component={Link} href="/register" color="primary-reverse">
+              <Button
+                Component={Link}
+                href="/register"
+                variant="primary-reverse"
+              >
                 Create an account
               </Button>
             </div>

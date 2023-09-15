@@ -3,25 +3,49 @@ import { PropsWithChildren } from "react";
 import classNames from "classnames";
 import styles from "./Button.module.css";
 
-interface BaseButtonProps {
-  color?: "primary" | "primary-reverse";
+interface ButtonProps extends PropsWithChildren {
+  type?: "button" | "submit";
+  className?: string;
+  href?: LinkProps["href"];
+  onClick?: () => void;
+  variant?: "primary" | "primary-reverse" | "secondary" | "error";
+  slanted?: boolean;
   Component?: "button" | typeof Link;
 }
 
-type ButtonProps = BaseButtonProps &
-  PropsWithChildren<React.HTMLProps<HTMLButtonElement>>;
-
-type ButtonAsLinProps = BaseButtonProps & PropsWithChildren<LinkProps>;
-
-export const Button: React.FC<ButtonProps | ButtonAsLinProps> = (props) => {
-  const { color = "primary", href, Component = "button", children } = props;
+export const Button: React.FC<ButtonProps> = (props) => {
+  const {
+    className,
+    href,
+    onClick,
+    type = "button",
+    variant = "primary",
+    Component = "button",
+    slanted,
+    children,
+  } = props;
 
   return (
     <Component
       href={href as LinkProps["href"]}
-      className={classNames(styles.button, styles[`color-${color}`])}
+      type={Component === "button" ? type : undefined}
+      className={classNames(
+        className,
+        styles.button,
+        styles[`variant-${variant}`],
+        {
+          [styles.slanted]: slanted,
+        }
+      )}
+      onClick={onClick}
     >
-      {children}
+      <span
+        className={classNames(styles.content, {
+          [styles.slanted]: slanted,
+        })}
+      >
+        {children}
+      </span>
     </Component>
   );
 };

@@ -22,7 +22,7 @@ export default function RecoverPassword() {
           <div className="mt-8 md:mt-12">
             <Separator className="mb-6">Or</Separator>
             <div className="flex justify-center">
-              <Button Component={Link} href="/" color="primary-reverse">
+              <Button Component={Link} href="/" variant="primary-reverse">
                 Sign in
               </Button>
             </div>
