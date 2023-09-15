@@ -12,26 +12,19 @@ export default function Home() {
       <div className="w-full m-auto overflow-hidden py-8">
         <Logo />
         <Form className="mt-10 md:mt-16">
-          <span className="text-sm mb-3 block">Sign in</span>
+          <span className="text-sm mb-3 block">Sign up</span>
           <div className="grid grid-rows-3 grid-flow-col gap-3">
             <Input type="text" placeholder="Username" required />
             <Input type="password" placeholder="Password" required />
-            <div className="grid grid-cols-3 gap-3">
-              <div className="flex items-center col-span-2">
-                <Link href={""} className="text-sm">
-                  Recover password
-                </Link>
-              </div>
-              <div className="flex justify-end">
-                <Button type="submit">Login</Button>
-              </div>
+            <div className="flex justify-end">
+              <Button type="submit">Create</Button>
             </div>
           </div>
           <div className="mt-8 md:mt-12">
             <Separator className="mb-6">Or</Separator>
             <div className="flex justify-center">
-              <Button Component={Link} href="/register" color="primary-reverse">
-                Create an account
+              <Button Component={Link} href="/" color="primary-reverse">
+                Sign in
               </Button>
             </div>
           </div>

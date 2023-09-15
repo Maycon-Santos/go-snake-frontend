@@ -1,0 +1,35 @@
+.button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: fit-content;
+  height: 40px;
+  padding: 0 var(--spacing-3);
+
+  &:hover {
+    cursor: pointer;
+  }
+
+  &:hover,
+  &:focus {
+    text-decoration: none;
+  }
+}
+
+.color-primary {
+  color: var(--foreground-reverse-color);
+  background-color: var(--foreground-color);
+
+  &:hover {
+    background-color: black;
+  }
+}
+
+.color-primary-reverse {
+  color: var(--foreground-color);
+  background-color: var(--foreground-reverse-color);
+
+  &:hover {
+    background-color: white;
+  }
+}

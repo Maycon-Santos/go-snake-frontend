@@ -1,0 +1,23 @@
+.container {
+  margin: 0 auto;
+  width: 100%;
+  min-height: fit-content;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.container-width-small {
+  max-width: 500px;
+}
+
+.container-width-medium {
+  max-width: 800px;
+}
+
+.container-width-large {
+  max-width: 1024px;
+}
+
+.container-width-fluid {
+  max-width: none;
+}
