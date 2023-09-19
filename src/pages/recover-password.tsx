@@ -1,3 +1,4 @@
+import type { GetServerSideProps } from "next";
 import Link from "next/link";
 import Layout from "@/components/Layout";
 import Form from "@/components/Form";
@@ -5,6 +6,22 @@ import Input from "@/components/Form/Input";
 import Button from "@/components/Form/Button";
 import Separator from "@/components/Form/Separator";
 import Logo from "@/components/Logo";
+import { getAccount } from "@/lib/account";
+
+export const getServerSideProps = (async (context) => {
+  const account = await getAccount(context.req, context.res);
+
+  if (account) {
+    return {
+      redirect: {
+        destination: "/lobby",
+        permanent: false,
+      },
+    };
+  }
+
+  return { props: {} };
+}) satisfies GetServerSideProps;
 
 export default function RecoverPassword() {
   return (
@@ -13,7 +30,7 @@ export default function RecoverPassword() {
         <Logo />
         <Form className="mt-10 md:mt-16">
           <span className="text-sm mb-3 block">Recover password</span>
-          <div className="grid grid-rows-2 grid-flow-col gap-3">
+          <div className="flex flex-col gap-3">
             <Input type="text" placeholder="Username or email" required />
             <div className="flex justify-end">
               <Button type="submit">Send email</Button>

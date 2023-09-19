@@ -12,7 +12,8 @@
 }
 
 .modal {
-  width: fit-content;
+  width: 100%;
+  max-width: 500px;
   margin: auto;
   background-color: var(--foreground-reverse-color);
   cursor: initial;

@@ -9,10 +9,11 @@ const pressStart2P = localFont({
 
 interface PlayerStageProps extends React.HTMLProps<HTMLDivElement> {
   username: string;
+  ready?: boolean;
 }
 
 export const PlayerStage: React.FC<PlayerStageProps> = (props) => {
-  const { username, className, ...rest } = props;
+  const { username, ready, className, ...rest } = props;
 
   const snakeBody = [
     ["■", "■", "□"],
@@ -24,7 +25,11 @@ export const PlayerStage: React.FC<PlayerStageProps> = (props) => {
 
   return (
     <div
-      className={classNames("grid grid-rows-4 justify-center", className)}
+      className={classNames(
+        "grid grid-rows-4 justify-center",
+        styles.wrapper,
+        className
+      )}
       {...rest}
     >
       <div
@@ -54,6 +59,11 @@ export const PlayerStage: React.FC<PlayerStageProps> = (props) => {
       >
         {username}
       </span>
+      {ready && (
+        <div className="absolute left-2/4 bottom-10 py-2 px-3 text-sm bg-foreground-reverse-light">
+          Ready
+        </div>
+      )}
     </div>
   );
 };

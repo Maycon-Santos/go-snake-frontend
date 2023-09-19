@@ -77,3 +77,13 @@ body {
 .bg-color {
   background-color: var(--background-color);
 }
+
+.bg-foreground-reverse-light {
+  background-color: var(--foreground-reverse-color-light);
+}
+
+.error-color {
+  color: var(--error-color);
+}
+
+/* #d58635 */
