@@ -3,8 +3,8 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
 import connectMatch, {
@@ -17,10 +17,13 @@ import connectMatch, {
 type MatchContextValue = {
   connect: (matchId: string) => void;
   send?: MatchConnection["send"];
+  listeners: (() => void)[];
+  connected: boolean;
+  loading: boolean;
   state: {
-    match?: Match;
-    players?: { [id: string]: Player };
-    foods?: { [id: string]: Food };
+    match: Match;
+    players: { [id: string]: Player };
+    foods: { [id: string]: Food };
   };
 };
 
@@ -28,61 +31,94 @@ const MatchContext = createContext<MatchContextValue>({
   connect() {
     console.error("MatchProvider is not implemented");
   },
-  state: {},
+  listeners: [],
+  state: {
+    match: {} as Match,
+    foods: {},
+    players: {},
+  },
+  connected: false,
+  loading: false,
 });
 
 export const MatchProvider: React.FC<PropsWithChildren> = (props) => {
   const { children } = props;
-  const [match, setMatch] = useState<Match>();
-  const [players, setPlayers] = useState<{ [id: string]: Player }>();
-  const [foods, setFoods] = useState<{ [id: string]: Food }>();
+  const [connected, setConnected] = useState(false);
+  const [loading, setLoading] = useState(false);
   const matchConnection = useMemo<{ current?: MatchConnection }>(
     () => ({}),
     []
   );
 
+  const matchState = useMemo(
+    () => ({
+      match: {} as Match,
+      players: {} as { [id: string]: Player },
+      foods: {} as { [id: string]: Food },
+    }),
+    []
+  );
+
+  const listeners = useMemo<MatchContextValue["listeners"]>(() => [], []);
+
   const connect = useCallback(
     async (matchId: string) => {
-      matchConnection.current = await connectMatch(matchId);
+      try {
+        setLoading(true);
+        matchConnection.current = await connectMatch(matchId);
+        setConnected(true);
+        setLoading(false);
 
-      let players: { [id: string]: Player };
-      let foods: { [id: string]: Food };
+        matchConnection.current.onMessage((message) => {
+          const { match, player, removePlayer, food } = message;
 
-      matchConnection.current.onMessage((message) => {
-        const { match, player, food } = message;
+          if (match) {
+            Object.assign(matchState.match, match);
+          }
 
-        if (match) {
-          setMatch(match);
-        }
+          if (player) {
+            Object.assign(matchState.players, {
+              [player.id]: player,
+            });
+          }
 
-        if (player) {
-          players = {
-            ...players,
-            [player.id]: player,
-          };
+          if (removePlayer) {
+            delete matchState.players[removePlayer];
+          }
 
-          setPlayers(players);
-        }
+          if (food) {
+            Object.assign(matchState.foods, {
+              [food.id]: food,
+            });
+          }
 
-        if (food) {
-          foods = {
-            ...foods,
-            [food.id]: food,
-          };
-
-          setFoods(foods);
-        }
-      });
+          listeners.forEach((fn) => fn());
+        });
+      } catch (e) {
+        setLoading(false);
+        throw e;
+      }
     },
-    [matchConnection]
+    [
+      listeners,
+      matchConnection,
+      matchState.foods,
+      matchState.match,
+      matchState.players,
+    ]
   );
 
   return (
     <MatchContext.Provider
       value={{
         connect,
-        send: matchConnection.current?.send,
-        state: { match, players, foods },
+        connected,
+        loading,
+        get send() {
+          return matchConnection.current?.send;
+        },
+        listeners,
+        state: matchState,
       }}
     >
       {children}
@@ -90,6 +126,19 @@ export const MatchProvider: React.FC<PropsWithChildren> = (props) => {
   );
 };
 
-export const useMatch = () => {
-  return useContext(MatchContext);
+export const useMatch = (rerenderOnChangeState?: boolean) => {
+  const { connect, loading, state, send, connected, listeners } =
+    useContext(MatchContext);
+  const [, rerender] = useState(0);
+
+  useEffect(() => {
+    if (!rerenderOnChangeState) return;
+
+    const listenerIndex = listeners.push(() => rerender((v) => v + 1)) - 1;
+    return () => {
+      delete listeners[listenerIndex];
+    };
+  }, [listeners, rerenderOnChangeState]);
+
+  return { connect, loading, state, connected, send };
 };

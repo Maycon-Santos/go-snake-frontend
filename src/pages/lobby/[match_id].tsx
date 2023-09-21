@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import classNames from "classnames";
 import { useRouter } from "next/router";
@@ -8,11 +8,12 @@ import Logo from "@/components/Logo";
 import MainMenu from "@/components/MainMenu";
 import PlayerStage from "@/components/PlayerStage";
 import ConnectMatchModal from "@/components/ConnectMatchModal";
-import { useModal } from "@/components/Modal";
+import Modal, { useModal } from "@/components/Modal";
 import { getAccount } from "@/lib/account";
 import AccountProvider from "@/components/AccountProvider";
 import createMatch from "@/services/createMatch";
 import { useMatch } from "@/components/MatchProvider";
+import ErrConnMatchModal from "@/components/ErrConnMatchModal";
 
 export const getServerSideProps = (async (context) => {
   const account = await getAccount(context.req, context.res);
@@ -33,18 +34,25 @@ export default function Lobby(
   props: InferGetServerSidePropsType<typeof getServerSideProps>
 ) {
   const { account } = props;
+
   const router = useRouter();
+  const { match_id: matchId } = router.query;
+
   const connectMatchModal = useModal();
+  const errorConnectMatchModal = useModal();
+
   const {
-    connect: connectMatch,
+    connect,
+    connected: matchConnected,
+    loading: matchConnecting,
     send,
     state: { match, players },
-  } = useMatch();
-  const { match_id: matchId } = router.query;
-  const hasMatch = typeof matchId === "string" && matchId != "_";
-  const isReady = players !== undefined && players[account.id].ready;
+  } = useMatch(true);
+
+  const isReady = players[account.id] && players[account.id].ready;
 
   const [createMatchIsLoading, setCreateMatchIsLoading] = useState(false);
+  const isLoading = createMatchIsLoading || matchConnecting;
 
   const onCreateMatch = async () => {
     setCreateMatchIsLoading(true);
@@ -64,9 +72,34 @@ export default function Lobby(
     setCreateMatchIsLoading(false);
   };
 
+  const connectMatch = useCallback(
+    async (matchId: string) => {
+      if (matchConnected || matchConnecting) {
+        return;
+      }
+
+      if (errorConnectMatchModal.isOpen) {
+        return;
+      }
+
+      try {
+        await connect(matchId);
+        return true;
+      } catch (e) {
+        router.replace("/lobby");
+        errorConnectMatchModal.toggle();
+      }
+
+      return false;
+    },
+    [connect, errorConnectMatchModal, matchConnected, matchConnecting, router]
+  );
+
   useEffect(() => {
-    if (hasMatch) connectMatch(matchId);
-  }, [connectMatch, hasMatch, matchId]);
+    if (typeof matchId === "string" && matchId != "_") {
+      connectMatch(matchId);
+    }
+  }, [connectMatch, matchId]);
 
   useEffect(() => {
     if (match?.status === "RUNNING") {
@@ -82,13 +115,17 @@ export default function Lobby(
   return (
     <AccountProvider account={account}>
       <Layout containerWidth="full" className="grid">
-        <ConnectMatchModal state={connectMatchModal} />
+        <ErrConnMatchModal state={errorConnectMatchModal} />
+        <ConnectMatchModal
+          state={connectMatchModal}
+          connectMatch={connectMatch}
+        />
         <div className="w-full flex flex-col min-h-screen pt-6 sticky top-0">
           <div className="grid grid-cols-3">
             <Logo variant="small" className="col-span-2" />
             <div className="justify-self-end self-center">
-              {!hasMatch && <MainMenu />}
-              {hasMatch && (
+              {!matchConnected && <MainMenu />}
+              {matchConnected && (
                 <Button variant="error" slanted>
                   Exit
                 </Button>
@@ -96,62 +133,65 @@ export default function Lobby(
             </div>
           </div>
           <div className="flex flex-col md:flex-row h-full">
-            <div className="flex flex-col md:grid lg:grid-rows-3 lg:grid-cols-3 gap-6 pt-12 pb-6 md:pr-6 w-full m-auto">
-              {!players && (
+            <div className="flex flex-col md:grid lg:grid-rows-3 lg:grid-cols-3 gap-6 pt-5 pb-6 md:pr-6 w-full m-auto">
+              {!players[account.id] && (
                 <PlayerStage
-                  username={account.username}
+                  player={{ id: account.id, username: account.username }}
                   className="md:row-start-2 md:col-start-2"
                 />
               )}
               {players &&
                 Object.keys(players).map((playerId) => {
-                  const { username, ready } = players[playerId];
+                  const player = players[playerId];
 
                   return (
                     <PlayerStage
                       key={playerId}
-                      username={username}
+                      player={player}
                       className={classNames({
                         ["md:row-start-2 md:col-start-2"]:
                           playerId === account.id,
                       })}
-                      ready={ready}
                     />
                   );
                 })}
             </div>
             <div className="flex flex-col mt-auto pt-3 pb-6 md:w-128 sticky bottom-0 bg-color">
               <div className="flex flex-col w-full gap-3">
-                {hasMatch && <span>Match ID: {matchId}</span>}
-                {!hasMatch && (
+                {matchConnected && <span>Match ID: {matchId}</span>}
+                {!matchConnected && (
                   <Button
                     variant="primary-reverse"
                     onClick={connectMatchModal.toggle}
+                    disabled={isLoading}
+                    loading={matchConnecting}
                   >
                     Connect match
                   </Button>
                 )}
-                {!hasMatch && (
+                {!matchConnected && (
                   <Button
                     onClick={onCreateMatch}
-                    disabled={createMatchIsLoading}
+                    disabled={isLoading}
                     loading={createMatchIsLoading}
                   >
                     Create match
                   </Button>
                 )}
-                {!hasMatch && (
+                {!matchConnected && (
                   <Button
                     variant="secondary"
-                    className="text-4xl w-full w-full h-28"
+                    className="text-4xl w-full h-28"
+                    disabled={isLoading}
                   >
                     Start
                   </Button>
                 )}
-                {hasMatch && (
+                {matchConnected && (
                   <Button
                     variant={isReady ? "tertiary" : "secondary"}
-                    className="text-4xl w-full w-full h-28"
+                    className="text-4xl w-full h-28"
+                    disabled={isLoading}
                     onClick={() => {
                       if (send) send({ ready: !isReady });
                     }}

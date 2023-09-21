@@ -9,10 +9,11 @@ const pressStart2P = localFont({
 interface InputProps extends React.HTMLProps<HTMLInputElement> {}
 
 export const Input: React.FC<InputProps> = (props) => {
-  const { className, ...rest } = props;
+  const { className, autoFocus, ...rest } = props;
   return (
     <input
       className={classNames(pressStart2P.className, styles.input, className)}
+      autoFocus={autoFocus}
       {...rest}
     />
   );

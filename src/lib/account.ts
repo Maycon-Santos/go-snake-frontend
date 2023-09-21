@@ -21,13 +21,16 @@ export async function getAccount(
   const headers: HeadersInit = new Headers();
   headers.set("Token", token);
 
-  const request = await fetch(`${API_BASE_URL}/v1/get_account`, {
-    headers,
-  });
+  try {
+    const request = await fetch(`${API_BASE_URL}/v1/get_account`, {
+      headers,
+    });
 
-  if (request.status != OK) {
+    if (request.status != OK) {
+      return null;
+    }
+    return (await request.json()) as Account;
+  } catch (e) {
     return null;
   }
-
-  return (await request.json()) as Account;
 }

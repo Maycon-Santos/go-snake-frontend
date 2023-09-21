@@ -8,6 +8,7 @@ interface ButtonProps extends PropsWithChildren {
   loading?: boolean;
   type?: "button" | "submit";
   className?: string;
+  autoFocus?: boolean;
   href?: LinkProps["href"];
   onClick?: () => void;
   variant?: "primary" | "primary-reverse" | "secondary" | "tertiary" | "error";
@@ -20,6 +21,7 @@ export const Button: React.FC<ButtonProps> = (props) => {
     disabled,
     loading,
     className,
+    autoFocus,
     href,
     onClick,
     type = "button",
@@ -44,6 +46,7 @@ export const Button: React.FC<ButtonProps> = (props) => {
         }
       )}
       onClick={onClick}
+      autoFocus={autoFocus}
     >
       <span
         className={classNames(styles.content, {

@@ -1,19 +1,24 @@
 import React from "react";
+import Link from "next/link";
 import classNames from "classnames";
 import localFont from "next/font/local";
+import { Player } from "@/services/connectMatch";
 import styles from "./PlayerStage.module.css";
+import { useUser } from "../AccountProvider";
+import Button from "../Form/Button";
 
 const pressStart2P = localFont({
   src: "../../assets/fonts/PressStart2P-Regular.ttf",
 });
 
 interface PlayerStageProps extends React.HTMLProps<HTMLDivElement> {
-  username: string;
-  ready?: boolean;
+  player: Partial<Player>;
+  hideCustomButton?: boolean;
 }
 
 export const PlayerStage: React.FC<PlayerStageProps> = (props) => {
-  const { username, ready, className, ...rest } = props;
+  const { player, className, hideCustomButton, ...rest } = props;
+  const user = useUser();
 
   const snakeBody = [
     ["■", "■", "□"],
@@ -57,9 +62,14 @@ export const PlayerStage: React.FC<PlayerStageProps> = (props) => {
           "text-2xl font-bold text-center"
         )}
       >
-        {username}
+        {player.username}
       </span>
-      {ready && (
+      {user.id === player.id && !hideCustomButton && (
+        <Button className="mt-3" Component={Link} href="/custom-player">
+          Custom
+        </Button>
+      )}
+      {player.ready && (
         <div className="absolute left-2/4 bottom-10 py-2 px-3 text-sm bg-foreground-reverse-light">
           Ready
         </div>

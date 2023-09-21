@@ -31,7 +31,12 @@ export default function RecoverPassword() {
         <Form className="mt-10 md:mt-16">
           <span className="text-sm mb-3 block">Recover password</span>
           <div className="flex flex-col gap-3">
-            <Input type="text" placeholder="Username or email" required />
+            <Input
+              type="text"
+              placeholder="Username or email"
+              autoFocus
+              required
+            />
             <div className="flex justify-end">
               <Button type="submit">Send email</Button>
             </div>

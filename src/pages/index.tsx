@@ -74,6 +74,7 @@ export default function Home(
               placeholder="Username"
               name="username"
               required
+              autoFocus
             />
             {USERNAME_ERROR_TYPES.includes(error.type) && (
               <span className="text-xs error-color">{error.message}</span>

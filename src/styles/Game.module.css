@@ -1,0 +1,5 @@
+.game {
+  box-shadow: 0 0 0 2px #5b7557;
+  background-image: linear-gradient(to right, #8cc384 1px, transparent 1px),
+    linear-gradient(to bottom, #8cc384 1px, transparent 1px);
+}
