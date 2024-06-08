@@ -1,11 +1,13 @@
+/* eslint-disable @next/next/no-img-element */
 import React from "react";
 import Link from "next/link";
 import classNames from "classnames";
 import localFont from "next/font/local";
 import { Player } from "@/services/connectMatch";
 import styles from "./PlayerStage.module.css";
-import { useUser } from "../AccountProvider";
+import { useAccount } from "../AccountProvider";
 import Button from "../Form/Button";
+import { useSkins } from "../SkinsProvider/SkinsProvider";
 
 const pressStart2P = localFont({
   src: "../../assets/fonts/PressStart2P-Regular.ttf",
@@ -13,12 +15,22 @@ const pressStart2P = localFont({
 
 interface PlayerStageProps extends React.HTMLProps<HTMLDivElement> {
   player: Partial<Player>;
+  skin?: {
+    color: string;
+    pattern: string;
+  };
   hideCustomButton?: boolean;
 }
 
 export const PlayerStage: React.FC<PlayerStageProps> = (props) => {
-  const { player, className, hideCustomButton, ...rest } = props;
-  const user = useUser();
+  const { player, skin: skinIds, className, hideCustomButton, ...rest } = props;
+  const { account } = useAccount();
+  const { availableSkins } = useSkins();
+
+  const skin = {
+    color: availableSkins.colors[skinIds ? skinIds.color : "3"],
+    pattern: availableSkins.patterns[skinIds ? skinIds.pattern : "1"],
+  };
 
   const snakeBody = [
     ["■", "■", "□"],
@@ -48,8 +60,16 @@ export const PlayerStage: React.FC<PlayerStageProps> = (props) => {
                   className={classNames(styles.bodyFragment, {
                     [styles.whiteSpace]: col === "□",
                   })}
-                  style={{ backgroundColor: "cyan" }}
-                />
+                  style={{ backgroundColor: skin.color || "black" }}
+                >
+                  {skin.pattern?.type === "svg" && (
+                    <img
+                      src={`data:image/svg+xml;utf8,${skin.pattern.source}`}
+                      className={styles.pattern}
+                      alt=""
+                    />
+                  )}
+                </div>
               </React.Fragment>
             ))}
           </React.Fragment>
@@ -64,9 +84,9 @@ export const PlayerStage: React.FC<PlayerStageProps> = (props) => {
       >
         {player.username}
       </span>
-      {user.id === player.id && !hideCustomButton && (
+      {account.id === player.id && !hideCustomButton && (
         <Button className="mt-3" Component={Link} href="/custom-player">
-          Custom
+          Customize
         </Button>
       )}
       {player.ready && (

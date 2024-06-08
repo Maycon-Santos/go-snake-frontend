@@ -10,7 +10,7 @@ import Separator from "@/components/Form/Separator";
 import Logo from "@/components/Logo";
 import { FormProps } from "@/components/Form/Form";
 import signIn from "@/services/signIn";
-import { getAccount } from "@/lib/account";
+import { getAccount } from "@/services/account";
 import {
   ERROR_MAP,
   PASSWORD_ERROR_TYPES,

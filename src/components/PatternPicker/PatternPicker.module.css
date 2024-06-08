@@ -1,0 +1,34 @@
+.wrapper {
+  display: flex;
+  flex-flow: row wrap;
+  max-width: 25rem;
+
+  &::after {
+    content: "";
+    flex: auto;
+  }
+}
+
+.pattern {
+  padding: 1rem;
+
+  &:focus {
+    z-index: 1;
+  }
+
+  &:hover {
+    background-color: var(--foreground-reverse-color);
+  }
+
+  &.active {
+    filter: invert(1);
+    background-color: var(--foreground-reverse-color);
+  }
+}
+
+.patternImage {
+  width: 3rem;
+  height: 3rem;
+  mix-blend-mode: luminosity;
+  filter: brightness(0);
+}

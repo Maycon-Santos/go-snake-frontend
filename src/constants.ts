@@ -17,7 +17,7 @@ export const ERROR_MAP = {
 
   UNKNOWN: "",
   PAYLOAD_INVALID: "",
-  ROOM_NOT_FOUND: "",
+  MATCH_NOT_FOUND: "",
 };
 
 export const USERNAME_ERROR_TYPES = [

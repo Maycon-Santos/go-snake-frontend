@@ -1,0 +1,32 @@
+.wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 17.6rem;
+  box-sizing: border-box;
+  border: 4px solid var(--foreground-reverse-color);
+}
+
+.color {
+  position: relative;
+  min-width: 1.9rem;
+  height: 30px;
+
+  &:focus {
+    z-index: 1;
+  }
+
+  &.active {
+    &::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      display: block;
+      width: 30%;
+      height: 30%;
+      border-radius: 50%;
+      background-color: rgba(100, 100, 100, 0.5);
+    }
+  }
+}

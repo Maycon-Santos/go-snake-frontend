@@ -7,12 +7,16 @@ import {
   useMemo,
   useState,
 } from "react";
+import { useRouter } from "next/router";
 import connectMatch, {
   Food,
   Match,
   MatchConnection,
   Player,
+  Skin,
 } from "@/services/connectMatch";
+import Modal, { useModal } from "../Modal";
+import Button from "../Form/Button";
 
 type MatchContextValue = {
   connect: (matchId: string) => void;
@@ -23,6 +27,7 @@ type MatchContextValue = {
   state: {
     match: Match;
     players: { [id: string]: Player };
+    playerSkins: { [playerId: string]: Skin };
     foods: { [id: string]: Food };
   };
 };
@@ -36,6 +41,7 @@ const MatchContext = createContext<MatchContextValue>({
     match: {} as Match,
     foods: {},
     players: {},
+    playerSkins: {},
   },
   connected: false,
   loading: false,
@@ -45,6 +51,8 @@ export const MatchProvider: React.FC<PropsWithChildren> = (props) => {
   const { children } = props;
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(false);
+  const lostConnectionModal = useModal();
+  const router = useRouter();
   const matchConnection = useMemo<{ current?: MatchConnection }>(
     () => ({}),
     []
@@ -54,6 +62,7 @@ export const MatchProvider: React.FC<PropsWithChildren> = (props) => {
     () => ({
       match: {} as Match,
       players: {} as { [id: string]: Player },
+      playerSkins: {} as { [playerId: string]: Skin },
       foods: {} as { [id: string]: Food },
     }),
     []
@@ -69,8 +78,13 @@ export const MatchProvider: React.FC<PropsWithChildren> = (props) => {
         setConnected(true);
         setLoading(false);
 
+        matchConnection.current.onClose(() => {
+          setConnected(false);
+          lostConnectionModal.toggle();
+        });
+
         matchConnection.current.onMessage((message) => {
-          const { match, player, removePlayer, food } = message;
+          const { match, player, playerSkin, removePlayer, food } = message;
 
           if (match) {
             Object.assign(matchState.match, match);
@@ -79,6 +93,12 @@ export const MatchProvider: React.FC<PropsWithChildren> = (props) => {
           if (player) {
             Object.assign(matchState.players, {
               [player.id]: player,
+            });
+          }
+
+          if (playerSkin) {
+            Object.assign(matchState.playerSkins, {
+              [playerSkin.playerId]: playerSkin,
             });
           }
 
@@ -101,9 +121,11 @@ export const MatchProvider: React.FC<PropsWithChildren> = (props) => {
     },
     [
       listeners,
+      lostConnectionModal,
       matchConnection,
       matchState.foods,
       matchState.match,
+      matchState.playerSkins,
       matchState.players,
     ]
   );
@@ -121,6 +143,21 @@ export const MatchProvider: React.FC<PropsWithChildren> = (props) => {
         state: matchState,
       }}
     >
+      <Modal
+        title="Lost match connection"
+        text="This may occur due to network instability or internal server problems."
+        state={lostConnectionModal}
+      >
+        <Button
+          onClick={() => {
+            lostConnectionModal.toggle();
+            router.replace("/lobby");
+          }}
+          autoFocus
+        >
+          Ok
+        </Button>
+      </Modal>
       {children}
     </MatchContext.Provider>
   );

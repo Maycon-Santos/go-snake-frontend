@@ -1,1 +1,1 @@
-export { AccountProvider as default, useUser } from "./AccountProvider";
+export { AccountProvider as default, useAccount } from "./AccountProvider";

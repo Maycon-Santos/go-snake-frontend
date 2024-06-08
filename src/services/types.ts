@@ -10,5 +10,5 @@ export type Response<TResults = unknown> =
   | {
       success: false;
       type: Type;
-      message: string;
+      message?: string;
     };

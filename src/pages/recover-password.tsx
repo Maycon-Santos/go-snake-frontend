@@ -6,7 +6,7 @@ import Input from "@/components/Form/Input";
 import Button from "@/components/Form/Button";
 import Separator from "@/components/Form/Separator";
 import Logo from "@/components/Logo";
-import { getAccount } from "@/lib/account";
+import { getAccount } from "@/services/account";
 
 export const getServerSideProps = (async (context) => {
   const account = await getAccount(context.req, context.res);

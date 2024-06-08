@@ -14,6 +14,12 @@ export type Player = {
   alive: boolean;
 };
 
+export type Skin = {
+  playerId: string;
+  color: string;
+  pattern: string;
+};
+
 export type MatchStatus = "ON_HOLD" | "RUNNING";
 
 export type Map = {
@@ -39,23 +45,27 @@ export type Food = {
 
 type ReadMessage = {
   player?: Player;
+  playerSkin?: Skin;
+  removePlayer?: string;
   match?: Match;
   food?: Food;
-  removePlayer?: string;
 };
 
-type ReaderFn = (message: ReadMessage) => void;
+type OnReadHandler = (message: ReadMessage) => void;
+type OnCloseHandler = () => void;
 
 export type MatchConnection = {
   connected: boolean;
   send: (message: SendMessage) => void;
-  onMessage: (reader: ReaderFn) => void;
+  onMessage: (handler: OnReadHandler) => void;
+  onClose: (handler: OnCloseHandler) => void;
   close: WebSocket["close"];
 };
 
 export default function connectMatch(matchId: string) {
   const token = getCookie("token");
-  const readers: ReaderFn[] = [];
+  const onReadHandlers: OnReadHandler[] = [];
+  const onCloseHandlers: OnCloseHandler[] = [];
 
   return new Promise<MatchConnection>((resolve, reject) => {
     const socket = new WebSocket(
@@ -69,8 +79,11 @@ export default function connectMatch(matchId: string) {
     socket.addEventListener("open", () => {
       resolve({
         connected: true,
-        onMessage(reader) {
-          readers.push(reader);
+        onMessage(handler) {
+          onReadHandlers.push(handler);
+        },
+        onClose(handler) {
+          onCloseHandlers.push(handler);
         },
         send(message) {
           socket.send(JSON.stringify(message));
@@ -80,11 +93,15 @@ export default function connectMatch(matchId: string) {
     });
 
     socket.addEventListener("message", (e) => {
-      readers.forEach((reader) => {
-        reader(JSON.parse(e.data));
+      onReadHandlers.forEach((handler) => {
+        handler(JSON.parse(e.data));
       });
     });
 
-    socket.addEventListener("close", () => {});
+    socket.addEventListener("close", () => {
+      onCloseHandlers.forEach((handler) => {
+        handler();
+      });
+    });
   });
 }

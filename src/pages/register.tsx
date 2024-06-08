@@ -15,7 +15,7 @@ import {
   PASSWORD_ERROR_TYPES,
   USERNAME_ERROR_TYPES,
 } from "@/constants";
-import { getAccount } from "@/lib/account";
+import { getAccount } from "@/services/account";
 
 export const getServerSideProps = (async (context) => {
   const account = await getAccount(context.req, context.res);
